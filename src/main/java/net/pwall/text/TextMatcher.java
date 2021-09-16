@@ -81,6 +81,17 @@ public class TextMatcher {
     }
 
     /**
+     * Get the character at the nominated index.
+     *
+     * @param   index       the index
+     * @return              the character at that index
+     * @throws  IndexOutOfBoundsException   if the index is invalid
+     */
+    public char getChar(int index) {
+        return text[index];
+    }
+
+    /**
      * Get the length of the entire text.
      *
      * @return              the text length
@@ -142,6 +153,13 @@ public class TextMatcher {
      */
     public boolean isAtEnd() {
         return index >= length;
+    }
+
+    /**
+     * Undo the effect of the last match operation.
+     */
+    public void revert() {
+        index = start;
     }
 
     /**
@@ -337,6 +355,31 @@ public class TextMatcher {
         start = index;
         while (index < length && comparison.test(text[index]))
             index++;
+    }
+
+    /**
+     * Increment the index directly to the end of the text.
+     */
+    public void skipToEnd() {
+        start = index;
+        index = length;
+    }
+
+    /**
+     * Increment the index by a fixed amount.
+     *
+     * @param   n       the number of characters to skip (must be positive)
+     * @throws  IllegalArgumentException if the increment is negative
+     * @throws  StringIndexOutOfBoundsException if the incremented index is beyond end of string
+     */
+    public void skipFixed(int n) {
+        if (n < 0)
+            throw new IllegalArgumentException(String.valueOf(n));
+        int newIndex = index + n;
+        if (newIndex > length)
+            throw new StringIndexOutOfBoundsException(String.valueOf(newIndex));
+        start = index;
+        index = newIndex;
     }
 
     /**

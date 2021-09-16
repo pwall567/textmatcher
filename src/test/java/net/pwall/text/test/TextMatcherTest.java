@@ -112,6 +112,8 @@ public class TextMatcherTest {
         assertTrue(textMatcher.match("Hello"));
         assertEquals(0, textMatcher.getStart());
         assertEquals(5, textMatcher.getIndex());
+        textMatcher.revert();
+        assertEquals(0, textMatcher.getIndex());
     }
 
     @Test
@@ -170,6 +172,18 @@ public class TextMatcherTest {
     }
 
     @Test
+    public void shouldGetNominatedCharacter() {
+        TextMatcher textMatcher = new TextMatcher("ace");
+        assertEquals('e', textMatcher.getChar(2));
+        assertEquals('a', textMatcher.getChar(0));
+        assertEquals('c', textMatcher.getChar(1));
+        assertEquals(0, textMatcher.getStart());
+        assertEquals(0, textMatcher.getIndex());
+        assertThrows(IndexOutOfBoundsException.class, () -> textMatcher.getChar(3));
+        assertThrows(IndexOutOfBoundsException.class, () -> textMatcher.getChar(-1));
+    }
+
+    @Test
     public void shouldGetSingleCharacter() {
         TextMatcher textMatcher = new TextMatcher("ace");
         assertEquals('a', textMatcher.nextChar());
@@ -194,6 +208,22 @@ public class TextMatcherTest {
         assertThrows(StringIndexOutOfBoundsException.class, () -> textMatcher.getString(3, 2));
         assertThrows(StringIndexOutOfBoundsException.class, () -> textMatcher.getString(3, 14));
         assertThrows(StringIndexOutOfBoundsException.class, () -> textMatcher.getString(-1, 6));
+    }
+
+    @Test
+    public void shouldSkipToEnd() {
+        TextMatcher textMatcher = new TextMatcher("Hello, world!");
+        assertTrue(textMatcher.match("Hello"));
+        textMatcher.skipToEnd();
+        assertEquals(", world!", textMatcher.getResult());
+    }
+
+    @Test
+    public void shouldSkipFixedAmount() {
+        TextMatcher textMatcher = new TextMatcher("Hello, world!");
+        assertTrue(textMatcher.match("Hello"));
+        textMatcher.skipFixed(2);
+        assertEquals(", ", textMatcher.getResult());
     }
 
     @Test
