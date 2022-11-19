@@ -229,18 +229,19 @@ public class TextMatcherTest {
     @Test
     public void shouldMatchSequenceOfCharacters() {
         TextMatcher textMatcher = new TextMatcher("Hello, world!");
-        assertTrue(textMatcher.match(20, Character::isAlphabetic));
+        assertTrue(textMatcher.matchSeq(20, Character::isAlphabetic));
         assertEquals(0, textMatcher.getStart());
         assertEquals(5, textMatcher.getIndex());
         assertTrue(textMatcher.match(','));
         assertTrue(textMatcher.match(' '));
-        assertTrue(textMatcher.match(2, 2, Character::isLowerCase));
+        assertTrue(textMatcher.matchSeq(2, 2, Character::isLowerCase));
         assertEquals(7, textMatcher.getStart());
         assertEquals(9, textMatcher.getIndex());
-        assertTrue(textMatcher.match((ch) -> ch >= 'a' && ch <= 'z'));
+        assertTrue(textMatcher.matchSeq(ch -> ch >= 'a' && ch <= 'z'));
         assertEquals(9, textMatcher.getStart());
         assertEquals(12, textMatcher.getIndex());
         assertEquals(3, textMatcher.getResultLength());
+        assertTrue(textMatcher.matchSeq(0, 0, Character::isDigit)); // minimum zero always returns true
     }
 
     @Test
@@ -333,6 +334,23 @@ public class TextMatcherTest {
         assertEquals(0x123a, textMatcher.getResultHexInt());
         assertTrue(textMatcher.matchHex(0, 1));
         assertEquals(0xbc, textMatcher.getResultHexLong());
+    }
+
+    @Test
+    public void shouldMatchContinuation() {
+        TextMatcher textMatcher = new TextMatcher("abc123.x");
+        assertTrue(textMatcher.matchSeq(Character::isJavaIdentifierStart) &&
+                textMatcher.matchContinue(Character::isJavaIdentifierPart));
+        assertEquals("abc123", textMatcher.getResult());
+        assertTrue(textMatcher.match('.'));
+        assertTrue(textMatcher.matchSeq(Character::isJavaIdentifierStart) &&
+                textMatcher.matchContinue(Character::isJavaIdentifierPart));
+        assertEquals("x", textMatcher.getResult());
+        textMatcher = new TextMatcher("abc123.x");
+        assertTrue(textMatcher.matchSeq(5, Character::isJavaIdentifierStart));
+        assertTrue(textMatcher.matchContinue(5, Character::isJavaIdentifierPart));
+        assertEquals("abc12", textMatcher.getResult());
+        assertTrue(textMatcher.match('3'));
     }
 
 }

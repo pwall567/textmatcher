@@ -2,7 +2,7 @@
  * @(#) TextMatcher.java
  *
  * TextMatcher  Text matching functions
- * Copyright (c) 2021 Peter Wall
+ * Copyright (c) 2021, 2022 Peter Wall
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,6 @@
 package net.pwall.text;
 
 import java.util.Objects;
-import java.util.function.IntPredicate;
 
 /**
  * A text matching class to help with parsing text strings.  It maintains a current pointer within a string and updates
@@ -192,16 +191,6 @@ public class TextMatcher {
         for (int j = 0; j < len; j++)
             if (text[i++] != target.charAt(j))
                 return false;
-        return success(i);
-    }
-
-    /**
-     * Return success, setting the start index and the current index.
-     *
-     * @param   i       the new index value
-     * @return          {@code true}
-     */
-    private boolean success(int i) {
         start = index;
         index = i;
         return true;
@@ -234,14 +223,16 @@ public class TextMatcher {
      * @return              {@code true} if the characters in the text at the index satisfy the comparison function
      *                      (subject to the specified minimum and maximum number of characters)
      */
-    public boolean match(int maxChars, int minChars, IntPredicate comparison) {
+    public boolean matchSeq(int maxChars, int minChars, CharPredicate comparison) {
         int i = index;
         int stopper = maxChars > 0 ? Math.min(length, i + maxChars) : length;
         while (i < stopper && comparison.test(text[i]))
             i++;
         if (i - index < minChars)
             return false;
-        return success(i);
+        start = index;
+        index = i;
+        return true;
     }
 
     /**
@@ -253,8 +244,8 @@ public class TextMatcher {
      * @return              {@code true} if one or more characters in the text at the index satisfy the comparison
      *                      function (subject to the specified maximum number of characters)
      */
-    public boolean match(int maxChars, IntPredicate comparison) {
-        return match(maxChars, 1, comparison);
+    public boolean matchSeq(int maxChars, CharPredicate comparison) {
+        return matchSeq(maxChars, 1, comparison);
     }
 
     /**
@@ -265,8 +256,8 @@ public class TextMatcher {
      * @return              {@code true} if one or more characters in the text at the index satisfy the comparison
      *                      function
      */
-    public boolean match(IntPredicate comparison) {
-        return match(0, 1, comparison);
+    public boolean matchSeq(CharPredicate comparison) {
+        return matchSeq(0, 1, comparison);
     }
 
     /**
@@ -279,7 +270,7 @@ public class TextMatcher {
      *                      specified minimum and maximum number of digits)
      */
     public boolean matchDec(int maxDigits, int minDigits) {
-        return match(maxDigits, minDigits, TextMatcher::isDigit);
+        return matchSeq(maxDigits, minDigits, TextMatcher::isDigit);
     }
 
     /**
@@ -290,7 +281,7 @@ public class TextMatcher {
      *                      to the specified maximum number of digits)
      */
     public boolean matchDec(int maxDigits) {
-        return match(maxDigits, 1, TextMatcher::isDigit);
+        return matchSeq(maxDigits, 1, TextMatcher::isDigit);
     }
 
     /**
@@ -299,7 +290,7 @@ public class TextMatcher {
      * @return              {@code true} if one or more characters in the text at the index are decimal digits
      */
     public boolean matchDec() {
-        return match(0, 1, TextMatcher::isDigit);
+        return matchSeq(0, 1, TextMatcher::isDigit);
     }
 
     /**
@@ -312,7 +303,7 @@ public class TextMatcher {
      *                      the specified minimum and maximum number of digits)
      */
     public boolean matchHex(int maxDigits, int minDigits) {
-        return match(maxDigits, minDigits, TextMatcher::isHexDigit);
+        return matchSeq(maxDigits, minDigits, TextMatcher::isHexDigit);
     }
 
     /**
@@ -323,7 +314,7 @@ public class TextMatcher {
      *                      (subject to the specified maximum number of digits)
      */
     public boolean matchHex(int maxDigits) {
-        return match(maxDigits, 1, TextMatcher::isHexDigit);
+        return matchSeq(maxDigits, 1, TextMatcher::isHexDigit);
     }
 
     /**
@@ -332,7 +323,53 @@ public class TextMatcher {
      * @return              {@code true} if one or more characters in the text at the index are hexadecimal digits
      */
     public boolean matchHex() {
-        return match(0, 1, TextMatcher::isHexDigit);
+        return matchSeq(0, 1, TextMatcher::isHexDigit);
+    }
+
+    /**
+     * Match the characters at the index as a continuation using the specified comparison function, with a given minimum
+     * number of characters and an optional maximum, but do not set the start index on success.
+     *
+     * @param   maxChars    the maximum number characters to match, including previous match (or 0 to indicate no limit)
+     * @param   minChars    the minimum number characters for a successful match, including previous match
+     * @param   comparison  the comparison function
+     * @return              {@code true} if the characters in the text at the index satisfy the comparison function
+     *                      (subject to the specified minimum and maximum number of characters)
+     */
+    public boolean matchContinue(int maxChars, int minChars, CharPredicate comparison) {
+        int i = index;
+        int stopper = maxChars > 0 ? Math.min(length, start + maxChars) : length;
+        while (i < stopper && comparison.test(text[i]))
+            i++;
+        if (i - start < minChars)
+            return false;
+        index = i;
+        return true;
+    }
+
+    /**
+     * Match the characters at the index as a continuation using the specified comparison function, with no minimum
+     * number of characters and an optional maximum, but do not set the start index on success.
+     *
+     * @param   maxChars    the maximum number characters to match, including previous match (or 0 to indicate no limit)
+     * @param   comparison  the comparison function
+     * @return              {@code true} if the characters in the text at the index satisfy the comparison function
+     *                      (subject to the specified minimum and maximum number of characters)
+     */
+    public boolean matchContinue(int maxChars, CharPredicate comparison) {
+        return matchContinue(maxChars, 0, comparison);
+    }
+
+    /**
+     * Match the characters at the index as a continuation using the specified comparison function, with no minimum or
+     * maximum number of characters, but do not set the start index on success.
+     *
+     * @param   comparison  the comparison function
+     * @return              {@code true} if the characters in the text at the index satisfy the comparison function
+     *                      (subject to the specified minimum and maximum number of characters)
+     */
+    public boolean matchContinue(CharPredicate comparison) {
+        return matchContinue(0, 0, comparison);
     }
 
     /**
@@ -351,7 +388,7 @@ public class TextMatcher {
      *
      * @param   comparison  the comparison function
      */
-    public void skip(IntPredicate comparison) {
+    public void skip(CharPredicate comparison) {
         start = index;
         while (index < length && comparison.test(text[index]))
             index++;

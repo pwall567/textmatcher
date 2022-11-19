@@ -91,46 +91,11 @@ As described above, the `start` may never be set to a value greater than the `in
 
 ### `match`
 
-The `match` function has several overloaded forms, all matching one or more characters at the current `index`:
+The `match` function has two overloaded forms, both performing an exact match on one or more characters at the current
+`index`:
 
 - `boolean match(char ch)`: match a single character
 - `boolean match(CharSequence s)`: match a `CharSequence` (for example, a `String`)
-- `boolean match(int max, int min, IntPredicate test)`: match the characters at `index` using an `IntPredicate` test,
-  with a specified minimum and maximum (where zero maximum means no limit)
-- `boolean match(int max, IntPredicate test)`: match the characters at `index` using an `IntPredicate` test, with a
-  minimum of 1 and a specified maximum (again, zero means no limit)
-- `boolean match(IntPredicate test)`: match the characters at `index` using an `IntPredicate` test, with a minimum of 1
-  and no maximum
-
-For example, to match the characters at the `index` against any number of vowels, returning `true` only if there is at
-least one vowel:
-```java
-    if (tm.match(ch -> "aeiouAEIOU".indexOf(ch) >= 0)) {
-        // match is successful; getResult() will return the matched characters
-    }
-```
-
-### `matchDec`
-
-There are three overloaded forms of the `matchDec` (match decimal) function, similar to the three forms of `match` that
-match a variable number of characters:
-
-- `boolean matchDec(int max, int min)`: match the characters at `index` as decimal digits, with a specified minimum and
-  maximum (where zero maximum means no limit)
-- `boolean matchDec(int max)`: match the characters at `index` as decimal digits, with a minimum of 1 and a specified
-  maximum (again, zero means no limit)
-- `boolean matchDec()`: match the characters at `index` as decimal digits, with a minimum of 1 and no maximum
-
-### `matchHex`
-
-There are three overloaded forms of the `matchHex` (match hexadecimal) function, similar to the three forms of
-`matchDec`:
-
-- `boolean matchHex(int max, int min)`: match the characters at `index` as hexadecimal digits, with a specified minimum
-  and maximum (where zero maximum means no limit)
-- `boolean matchHex(int max)`: match the characters at `index` as hexadecimal digits, with a minimum of 1 and a
-  specified maximum (again, zero means no limit)
-- `boolean matchHex()`: match the characters at `index` as hexadecimal digits, with a minimum of 1 and no maximum
 
 ### `matchAny`
 
@@ -145,11 +110,85 @@ For example, to test whether the character at the `index` is a plus or minus sig
     }
 ```
 
+### `matchSeq`
+
+The `matchSeq` function matches a sequence of characters using a `CharPredicate`.
+This allows testing the characters against arbitrary criteria, as shown in the example below.
+
+- `boolean matchSeq(int max, int min, CharPredicate test)`: match the characters at `index` using a `CharPredicate`
+  test, with a specified minimum and maximum (where zero maximum means no limit)
+- `boolean matchSeq(int max, CharPredicate test)`: match the characters at `index` using a `CharPredicate` test, with a
+  minimum of 1 and a specified maximum (again, zero means no limit)
+- `boolean matchSeq(CharPredicate test)`: match the characters at `index` using a `CharPredicate` test, with a minimum
+  of 1 and no maximum
+
+For example, to match the characters at the `index` against any number of vowels, returning `true` only if there is at
+least one vowel at the current `index`:
+```java
+    if (tm.matchSeq(ch -> "aeiouAEIOU".indexOf(ch) >= 0)) {
+        // match is successful; getResult() will return the matched characters
+    }
+```
+
+Note that `matchSeq` with a minimum length of zero will always return `true`.
+
+### `matchContinue`
+
+There is often a need to string match operations together.
+For example, when matching a computer language identifier, the first character is generally required to be alphabetic,
+while the remaining characters may be alphabetic or numeric.
+The `matchContinue` function, when invoked following a successful match, will match additional characters using a
+`CharPredicate`, but on completion, will leave the start index to the location set by the previous match.
+Also, the maximum number of characters limit will include those already found in the previous match.
+
+- `boolean matchContinue(int max, int min, CharPredicate test)`: match the characters at `index` using a `CharPredicate`
+  test, with a specified minimum and maximum (where zero maximum means no limit)
+- `boolean matchContinue(int max, CharPredicate test)`: match the characters at `index` using a `CharPredicate` test,
+  with no minimum and a specified maximum (again, zero means no limit)
+- `boolean matchContinue(CharPredicate test)`: match the characters at `index` using a `CharPredicate` test, with no
+  minimum or maximum
+
+For example, to match a Java identifier using the `isJavaIdentifierStart` and `isJavaIdentifierPart` functions of the
+`Character` class:
+```java
+    if (tm.matchSeq(Character::isJavaIdentifierStart) && tm.matchContinue(Character::isJavaIdentifierPart)) {
+        // match is successful; getResult() will return the identifier
+    }
+```
+
+
+### `matchDec`
+
+There are three overloaded forms of the `matchDec` (match decimal) function, similar to the three forms of `match` that
+match a variable number of characters:
+
+- `boolean matchDec(int max, int min)`: match the characters at `index` as decimal digits, with a specified minimum and
+  maximum (where zero maximum means no limit)
+- `boolean matchDec(int max)`: match the characters at `index` as decimal digits, with a minimum of 1 and a specified
+  maximum (again, zero means no limit)
+- `boolean matchDec()`: match the characters at `index` as decimal digits, with a minimum of 1 and no maximum
+
+To match exactly two digits (_e.g._ for a date or time field), use `matchDec(2, 2)`, supplying the same number for
+minimum and maximum.
+
+### `matchHex`
+
+There are three overloaded forms of the `matchHex` (match hexadecimal) function, similar to the three forms of
+`matchDec`:
+
+- `boolean matchHex(int max, int min)`: match the characters at `index` as hexadecimal digits, with a specified minimum
+  and maximum (where zero maximum means no limit)
+- `boolean matchHex(int max)`: match the characters at `index` as hexadecimal digits, with a minimum of 1 and a
+  specified maximum (again, zero means no limit)
+- `boolean matchHex()`: match the characters at `index` as hexadecimal digits, with a minimum of 1 and no maximum
+
+To match exactly four hexadecimal digits, use `matchHex(4, 4)`, supplying the same number for minimum and maximum.
+
 ### `skip`
 
-This function skips characters that match an `IntPredicate`:
+This function skips characters that match a `CharPredicate`:
 
-- `void skip(IntPredicate test)`
+- `void skip(CharPredicate test)`
 
 For example:
 ```java
@@ -261,27 +300,37 @@ The `revert` function repositions the `index` to the `start` of the most recent 
 
 - `void revert()`
 
+### `CharPredicate`
+
+The `CharPredicate` interface describes an object which performs a test on a single character, for example, to check
+whether is a decimal digit.
+Several `TextMatcher` functions take a `CharPredicate` as an argument; this allows matching on any required criteria.
+
+`CharPredicate` is a functional interface, so that lambda constructs may be used in the functions that take it as an
+argument.
+It includes the default functions `negate`, `and` and `or` for consistency with the standard Java library functions.
+
 ## Dependency Specification
 
-The latest version of the library is 1.1, and it may be obtained from the Maven Central repository.
+The latest version of the library is 2.0, and it may be obtained from the Maven Central repository.
 
 ### Maven
 ```xml
     <dependency>
       <groupId>net.pwall.text</groupId>
       <artifactId>textmatcher</artifactId>
-      <version>1.1</version>
+      <version>2.0</version>
     </dependency>
 ```
 ### Gradle
 ```groovy
-    testImplementation 'net.pwall.text:textmatcher:1.1'
+    testImplementation 'net.pwall.text:textmatcher:2.0'
 ```
 ### Gradle (kts)
 ```kotlin
-    testImplementation("net.pwall.text:textmatcher:1.1")
+    testImplementation("net.pwall.text:textmatcher:2.0")
 ```
 
 Peter Wall
 
-2022-10-25
+2022-11-19
