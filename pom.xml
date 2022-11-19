@@ -5,7 +5,7 @@
 
   <groupId>net.pwall.text</groupId>
   <artifactId>textmatcher</artifactId>
-  <version>2.0</version>
+  <version>2.1</version>
   <name>Text Matcher</name>
   <description>Text matching functions</description>
   <packaging>jar</packaging>

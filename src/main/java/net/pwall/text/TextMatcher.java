@@ -197,6 +197,20 @@ public class TextMatcher {
     }
 
     /**
+     * Match the current character in the text using the specified comparison function.  Following a successful match
+     * the start index will point to the matched character and the index will be incremented past it.
+     *
+     * @param   comparison  the comparison function
+     * @return              {@code true} if the character in the text matches using the comparison function
+     */
+    public boolean match(CharPredicate comparison) {
+        if (index >= length || !comparison.test(text[index]))
+            return false;
+        start = index++;
+        return true;
+    }
+
+    /**
      * Match the current character in the text against any of the characters in a given {@link String}.  Following a
      * successful match the start index will point to the matched character and the index will be incremented past it.
      *

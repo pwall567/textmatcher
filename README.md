@@ -91,11 +91,12 @@ As described above, the `start` may never be set to a value greater than the `in
 
 ### `match`
 
-The `match` function has two overloaded forms, both performing an exact match on one or more characters at the current
+The `match` function has three overloaded forms, both performing a match on one or more characters at the current
 `index`:
 
 - `boolean match(char ch)`: match a single character
 - `boolean match(CharSequence s)`: match a `CharSequence` (for example, a `String`)
+- `boolean match(CharPredicate test)`: match a single character using a `CharPredicate` test
 
 ### `matchAny`
 
@@ -151,7 +152,7 @@ Also, the maximum number of characters limit will include those already found in
 For example, to match a Java identifier using the `isJavaIdentifierStart` and `isJavaIdentifierPart` functions of the
 `Character` class:
 ```java
-    if (tm.matchSeq(Character::isJavaIdentifierStart) && tm.matchContinue(Character::isJavaIdentifierPart)) {
+    if (tm.match(Character::isJavaIdentifierStart) && tm.matchContinue(Character::isJavaIdentifierPart)) {
         // match is successful; getResult() will return the identifier
     }
 ```
@@ -159,8 +160,7 @@ For example, to match a Java identifier using the `isJavaIdentifierStart` and `i
 
 ### `matchDec`
 
-There are three overloaded forms of the `matchDec` (match decimal) function, similar to the three forms of `match` that
-match a variable number of characters:
+There are three overloaded forms of the `matchDec` (match decimal) function, similar to the three forms of `matchSeq`:
 
 - `boolean matchDec(int max, int min)`: match the characters at `index` as decimal digits, with a specified minimum and
   maximum (where zero maximum means no limit)
@@ -312,23 +312,23 @@ It includes the default functions `negate`, `and` and `or` for consistency with 
 
 ## Dependency Specification
 
-The latest version of the library is 2.0, and it may be obtained from the Maven Central repository.
+The latest version of the library is 2.1, and it may be obtained from the Maven Central repository.
 
 ### Maven
 ```xml
     <dependency>
       <groupId>net.pwall.text</groupId>
       <artifactId>textmatcher</artifactId>
-      <version>2.0</version>
+      <version>2.1</version>
     </dependency>
 ```
 ### Gradle
 ```groovy
-    testImplementation 'net.pwall.text:textmatcher:2.0'
+    testImplementation 'net.pwall.text:textmatcher:2.1'
 ```
 ### Gradle (kts)
 ```kotlin
-    testImplementation("net.pwall.text:textmatcher:2.0")
+    testImplementation("net.pwall.text:textmatcher:2.1")
 ```
 
 Peter Wall

@@ -2,6 +2,10 @@
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## [2.1] - 2022-11-19
+### Changed
+- `TextMatcher`: added `match()` single character using predicate
+
 ## [2.0] - 2022-11-19
 ### Added
 - `CharPredicate`: new functional interface

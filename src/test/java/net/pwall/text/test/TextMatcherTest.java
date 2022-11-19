@@ -339,7 +339,7 @@ public class TextMatcherTest {
     @Test
     public void shouldMatchContinuation() {
         TextMatcher textMatcher = new TextMatcher("abc123.x");
-        assertTrue(textMatcher.matchSeq(Character::isJavaIdentifierStart) &&
+        assertTrue(textMatcher.match(Character::isJavaIdentifierStart) &&
                 textMatcher.matchContinue(Character::isJavaIdentifierPart));
         assertEquals("abc123", textMatcher.getResult());
         assertTrue(textMatcher.match('.'));
