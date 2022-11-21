@@ -2,6 +2,12 @@
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## [2.2] - 2022-11-21
+### Changed
+- `TextMatcher`: made `isDigit()` and `isHexDigit()` methods public
+- `TextMatcher`: changed `matchContinue()` to revert index on failed match
+- `TextMatcher`: `matchContinue()` parameters `maxChars` and `minChars` no longer include previous match
+
 ## [2.1] - 2022-11-19
 ### Changed
 - `TextMatcher`: added `match()` single character using predicate

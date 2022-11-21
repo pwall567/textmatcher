@@ -343,14 +343,24 @@ public class TextMatcherTest {
                 textMatcher.matchContinue(Character::isJavaIdentifierPart));
         assertEquals("abc123", textMatcher.getResult());
         assertTrue(textMatcher.match('.'));
-        assertTrue(textMatcher.matchSeq(Character::isJavaIdentifierStart) &&
+        assertTrue(textMatcher.match(Character::isJavaIdentifierStart) &&
                 textMatcher.matchContinue(Character::isJavaIdentifierPart));
         assertEquals("x", textMatcher.getResult());
         textMatcher = new TextMatcher("abc123.x");
-        assertTrue(textMatcher.matchSeq(5, Character::isJavaIdentifierStart));
-        assertTrue(textMatcher.matchContinue(5, Character::isJavaIdentifierPart));
+        assertTrue(textMatcher.match(Character::isJavaIdentifierStart));
+        assertTrue(textMatcher.matchContinue(4, Character::isJavaIdentifierPart));
         assertEquals("abc12", textMatcher.getResult());
         assertTrue(textMatcher.match('3'));
+    }
+
+    @Test
+    public void shouldLeaveIndexAtStartIfMatchContinueFails() {
+        TextMatcher textMatcher = new TextMatcher("%20%AX");
+        assertTrue(textMatcher.match('%') && textMatcher.matchContinue(2, 2, TextMatcher::isHexDigit));
+        assertEquals(0, textMatcher.getStart());
+        assertEquals(3, textMatcher.getIndex());
+        assertFalse(textMatcher.match('%') && textMatcher.matchContinue(2, 2, TextMatcher::isHexDigit));
+        assertEquals(3, textMatcher.getIndex());
     }
 
 }

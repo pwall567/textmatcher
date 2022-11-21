@@ -157,6 +157,9 @@ For example, to match a Java identifier using the `isJavaIdentifierStart` and `i
     }
 ```
 
+Like `matchSeq`, a `matchContinue` with a minimum length of zero will always return `true`.
+The forms of `matchContinue` that do not take a minimum length parameter use a default of zero, so they will always
+return `true`; the only effect is to increment the pointer beyond the characters that match the function.
 
 ### `matchDec`
 
@@ -312,25 +315,25 @@ It includes the default functions `negate`, `and` and `or` for consistency with 
 
 ## Dependency Specification
 
-The latest version of the library is 2.1, and it may be obtained from the Maven Central repository.
+The latest version of the library is 2.2, and it may be obtained from the Maven Central repository.
 
 ### Maven
 ```xml
     <dependency>
       <groupId>net.pwall.text</groupId>
       <artifactId>textmatcher</artifactId>
-      <version>2.1</version>
+      <version>2.2</version>
     </dependency>
 ```
 ### Gradle
 ```groovy
-    testImplementation 'net.pwall.text:textmatcher:2.1'
+    testImplementation 'net.pwall.text:textmatcher:2.2'
 ```
 ### Gradle (kts)
 ```kotlin
-    testImplementation("net.pwall.text:textmatcher:2.1")
+    testImplementation("net.pwall.text:textmatcher:2.2")
 ```
 
 Peter Wall
 
-2022-11-19
+2022-11-21
