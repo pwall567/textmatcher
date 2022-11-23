@@ -722,7 +722,7 @@ public class TextMatcher {
      * @param   ch      the character
      * @return          {@code true} if the character is a digit
      */
-    public static boolean isDigit(int ch) {
+    public static boolean isDigit(char ch) {
         return ch >= '0' && ch <= '9';
     }
 
@@ -732,7 +732,7 @@ public class TextMatcher {
      * @param   ch      the character
      * @return          {@code true} if the character is a hexadecimal digit
      */
-    public static boolean isHexDigit(int ch) {
+    public static boolean isHexDigit(char ch) {
         return isDigit(ch) || ch >= 'A' && ch <= 'F' || ch >= 'a' && ch <= 'f';
     }
 

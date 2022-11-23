@@ -315,25 +315,25 @@ It includes the default functions `negate`, `and` and `or` for consistency with 
 
 ## Dependency Specification
 
-The latest version of the library is 2.2, and it may be obtained from the Maven Central repository.
+The latest version of the library is 2.3, and it may be obtained from the Maven Central repository.
 
 ### Maven
 ```xml
     <dependency>
       <groupId>net.pwall.text</groupId>
       <artifactId>textmatcher</artifactId>
-      <version>2.2</version>
+      <version>2.3</version>
     </dependency>
 ```
 ### Gradle
 ```groovy
-    testImplementation 'net.pwall.text:textmatcher:2.2'
+    testImplementation 'net.pwall.text:textmatcher:2.3'
 ```
 ### Gradle (kts)
 ```kotlin
-    testImplementation("net.pwall.text:textmatcher:2.2")
+    testImplementation("net.pwall.text:textmatcher:2.3")
 ```
 
 Peter Wall
 
-2022-11-21
+2022-11-23

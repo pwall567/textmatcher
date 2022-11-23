@@ -2,6 +2,10 @@
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## [2.3] - 2022-11-23
+### Changed
+- `TextMatcher`: changed `isDigit()` and `isHexDigit()` to take `char`, not `int`
+
 ## [2.2] - 2022-11-21
 ### Changed
 - `TextMatcher`: made `isDigit()` and `isHexDigit()` methods public
