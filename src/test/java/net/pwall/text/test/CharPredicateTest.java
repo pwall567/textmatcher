@@ -2,7 +2,7 @@
  * @(#) CharPredicateTest.java
  *
  * TextMatcher  Text matching functions
- * Copyright (c) 2022 Peter Wall
+ * Copyright (c) 2022, 2023 Peter Wall
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,9 +25,9 @@
 
 package net.pwall.text.test;
 
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.Test;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import net.pwall.text.CharPredicate;
 

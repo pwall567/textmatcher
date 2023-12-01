@@ -2,6 +2,12 @@
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## [2.4] - 2023-12-01
+### Changed
+- `TextMatcher`: change to use string instead of char array
+- `TextMatcher`: improved performance of int and long conversions
+- `pom.xml`, tests: switched from Junit 5 to Junit 4 (more stable)
+
 ## [2.3] - 2022-11-23
 ### Changed
 - `TextMatcher`: changed `isDigit()` and `isHexDigit()` to take `char`, not `int`

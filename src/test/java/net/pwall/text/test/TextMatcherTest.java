@@ -2,7 +2,7 @@
  * @(#) TextMatcherTest.java
  *
  * TextMatcher  Text matching functions
- * Copyright (c) 2021 Peter Wall
+ * Copyright (c) 2021, 2023 Peter Wall
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,11 +25,11 @@
 
 package net.pwall.text.test;
 
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 import net.pwall.text.TextMatcher;
 
@@ -287,6 +287,22 @@ public class TextMatcherTest {
         assertTrue(textMatcher.matchDec());
         assertEquals(-123456, textMatcher.getResultInt(true));
         assertEquals(-123456L, textMatcher.getResultLong(true));
+        TextMatcher maxInt = new TextMatcher("2147483647");
+        assertEquals(Integer.MAX_VALUE, maxInt.getInt(0, 10));
+        TextMatcher maxIntPlus1 = new TextMatcher("2147483648");
+        assertThrows(NumberFormatException.class, () -> maxIntPlus1.getInt(0, 10));
+        TextMatcher minInt = new TextMatcher("-2147483648");
+        assertEquals(Integer.MIN_VALUE, minInt.getInt(1, 11, true));
+        TextMatcher minIntMinus1 = new TextMatcher("-2147483649");
+        assertThrows(NumberFormatException.class, () -> minIntMinus1.getInt(1, 11, true));
+        TextMatcher maxLong = new TextMatcher("9223372036854775807");
+        assertEquals(Long.MAX_VALUE, maxLong.getLong(0, 19));
+        TextMatcher maxLongPlus1 = new TextMatcher("9223372036854775808");
+        assertThrows(NumberFormatException.class, () -> maxLongPlus1.getLong(0, 19));
+        TextMatcher minLong = new TextMatcher("-9223372036854775808");
+        assertEquals(Long.MIN_VALUE, minLong.getLong(1, 20, true));
+        TextMatcher minLongMinus1 = new TextMatcher("-9223372036854775809");
+        assertThrows(NumberFormatException.class, () -> minLongMinus1.getInt(1, 20, true));
     }
 
     @Test

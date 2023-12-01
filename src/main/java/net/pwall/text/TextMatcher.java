@@ -25,8 +25,6 @@
 
 package net.pwall.text;
 
-import java.util.Objects;
-
 /**
  * A text matching class to help with parsing text strings.  It maintains a current pointer within a string and updates
  * this pointer on a successful match.
@@ -48,20 +46,10 @@ import java.util.Objects;
  */
 public class TextMatcher {
 
-    private static final int MAX_INT_DIV_10 = Integer.MAX_VALUE / 10;
-    private static final int MAX_INT_MOD_10 = Integer.MAX_VALUE % 10;
-    private static final int MIN_INT_DIV_10 = Integer.MIN_VALUE / 10;
-    private static final int MIN_INT_MOD_10 = -(Integer.MIN_VALUE % 10);
+    private static final int MAX_INT_MASK = 0xF << 28;
+    private static final long MAX_LONG_MASK = ((long)0xF) << 60;
 
-    private static final long MAX_LONG_DIV_10 = Long.MAX_VALUE / 10;
-    private static final int MAX_LONG_MOD_10 = (int)(Long.MAX_VALUE % 10);
-    private static final long MIN_LONG_DIV_10 = Long.MIN_VALUE / 10;
-    private static final int MIN_LONG_MOD_10 = -(int)(Long.MIN_VALUE % 10);
-
-    private static final int MAX_INT_MASK = 0xF0 << 24;
-    private static final long MAX_LONG_MASK = ((long)0xF0) << 56;
-
-    private final char[] text;
+    private final String text;
     private final int length;
     private int start;
     private int index;
@@ -70,10 +58,12 @@ public class TextMatcher {
      * Construct a {@code TextMatcher} with the specified text.
      *
      * @param   text        the text
-     * @throws  NullPointerException    if the tex is {@code null}
+     * @throws  NullPointerException    if the text is {@code null}
      */
     public TextMatcher(String text) {
-        this.text = Objects.requireNonNull(text, "Text must not be null").toCharArray();
+        if (text == null)
+            throw new NullPointerException("TextMatcher text must not be null");
+        this.text = text;
         length = text.length();
         start = 0;
         index = 0;
@@ -87,7 +77,7 @@ public class TextMatcher {
      * @throws  IndexOutOfBoundsException   if the index is invalid
      */
     public char getChar(int index) {
-        return text[index];
+        return text.charAt(index);
     }
 
     /**
@@ -169,7 +159,7 @@ public class TextMatcher {
      * @return          {@code true} if the character in the text matches the given character
      */
     public boolean match(char ch) {
-        if (index >= length || text[index] != ch)
+        if (index >= length || text.charAt(index) != ch)
             return false;
         start = index++;
         return true;
@@ -189,7 +179,7 @@ public class TextMatcher {
             return false;
         int i = index;
         for (int j = 0; j < len; j++)
-            if (text[i++] != target.charAt(j))
+            if (text.charAt(i++) != target.charAt(j))
                 return false;
         start = index;
         index = i;
@@ -204,7 +194,7 @@ public class TextMatcher {
      * @return              {@code true} if the character in the text matches using the comparison function
      */
     public boolean match(CharPredicate comparison) {
-        if (index >= length || !comparison.test(text[index]))
+        if (index >= length || !comparison.test(text.charAt(index)))
             return false;
         start = index++;
         return true;
@@ -221,7 +211,7 @@ public class TextMatcher {
     public boolean matchAny(String any) {
         if (index >= length)
             return false;
-        if (any.indexOf(text[index]) < 0)
+        if (any.indexOf(text.charAt(index)) < 0)
             return false;
         start = index++;
         return true;
@@ -241,7 +231,7 @@ public class TextMatcher {
     public boolean matchSeq(int maxChars, int minChars, CharPredicate comparison) {
         int i = index;
         int stopper = maxChars > 0 ? Math.min(length, i + maxChars) : length;
-        while (i < stopper && comparison.test(text[i]))
+        while (i < stopper && comparison.test(text.charAt(i)))
             i++;
         if (i - index < minChars)
             return false;
@@ -356,7 +346,7 @@ public class TextMatcher {
     public boolean matchContinue(int maxChars, int minChars, CharPredicate comparison) {
         int i = index;
         int stopper = maxChars > 0 ? Math.min(length, i + maxChars) : length;
-        while (i < stopper && comparison.test(text[i]))
+        while (i < stopper && comparison.test(text.charAt(i)))
             i++;
         if (i - index < minChars) {
             index = start;
@@ -400,7 +390,7 @@ public class TextMatcher {
      */
     public void skipAny(String any) {
         start = index;
-        while (index < length && any.indexOf(text[index]) >= 0)
+        while (index < length && any.indexOf(text.charAt(index)) >= 0)
             index++;
     }
 
@@ -411,7 +401,7 @@ public class TextMatcher {
      */
     public void skip(CharPredicate comparison) {
         start = index;
-        while (index < length && comparison.test(text[index]))
+        while (index < length && comparison.test(text.charAt(index)))
             index++;
     }
 
@@ -450,7 +440,7 @@ public class TextMatcher {
         start = index;
         if (index >= length)
             throw new StringIndexOutOfBoundsException(String.valueOf(index));
-        return text[index++];
+        return text.charAt(index++);
     }
 
     /**
@@ -463,7 +453,7 @@ public class TextMatcher {
      *                                          start offset, or the end offset is greater than the length
      */
     public String getString(int start, int end) {
-        return new String(text, start, end - start);
+        return text.substring(start, end);
     }
 
     /**
@@ -489,7 +479,7 @@ public class TextMatcher {
      * @throws  IndexOutOfBoundsException if the start index at or beyond the end of the text
      */
     public char getResultChar() {
-        return text[start];
+        return text.charAt(start);
     }
 
     /**
@@ -498,7 +488,7 @@ public class TextMatcher {
      * @return          the result of the last match
      */
     public String getResult() {
-        return new String(text, start, index - start);
+        return text.substring(start, index);
     }
 
     /**
@@ -551,7 +541,20 @@ public class TextMatcher {
      * @throws  IndexOutOfBoundsException   if the start and end indices are not contained within the text
      */
     public int getInt(int from, int to) {
-        return getInt(from, to, false);
+        if (to <= from)
+            throw new NumberFormatException();
+        int i = from;
+        while (i < to && text.charAt(i) == '0') {
+            if (++i == to)
+                return 0;
+        }
+        int result = convertDecDigit(text.charAt(i++));
+        while (i < to) {
+            result = result * 10 + convertDecDigit(text.charAt(i++));
+            if (result < 0)
+                throw new NumberFormatException();
+        }
+        return result;
     }
 
     /**
@@ -567,21 +570,24 @@ public class TextMatcher {
     public int getInt(int from, int to, boolean negative) {
         if (to <= from)
             throw new NumberFormatException();
+        int i = from;
+        while (i < to && text.charAt(i) == '0') {
+            if (++i == to)
+                return 0;
+        }
         int result = 0;
         if (negative) {
-            for (int i = from; i < to; i++) {
-                int n = convertDecDigit(text[i]);
-                if (result < MIN_INT_DIV_10 || result == MIN_INT_DIV_10 && n > MIN_INT_MOD_10)
+            while (i < to) {
+                result = result * 10 - convertDecDigit(text.charAt(i++));
+                if (result >= 0)
                     throw new NumberFormatException();
-                result = result * 10 - n;
             }
         }
         else {
-            for (int i = from; i < to; i++) {
-                int n = convertDecDigit(text[i]);
-                if (result > MAX_INT_DIV_10 || result == MAX_INT_DIV_10 && n > MAX_INT_MOD_10)
+            while (i < to) {
+                result = result * 10 + convertDecDigit(text.charAt(i++));
+                if (result < 0)
                     throw new NumberFormatException();
-                result = result * 10 + n;
             }
         }
         return result;
@@ -618,7 +624,20 @@ public class TextMatcher {
      * @throws  IndexOutOfBoundsException   if the start and end indices are not contained within the text
      */
     public long getLong(int from, int to) {
-        return getLong(from, to, false);
+        if (to <= from)
+            throw new NumberFormatException();
+        int i = from;
+        while (i < to && text.charAt(i) == '0') {
+            if (++i == to)
+                return 0;
+        }
+        long result = convertDecDigit(text.charAt(i++));
+        while (i < to) {
+            result = result * 10 + convertDecDigit(text.charAt(i++));
+            if (result < 0)
+                throw new NumberFormatException();
+        }
+        return result;
     }
 
     /**
@@ -634,21 +653,24 @@ public class TextMatcher {
     public long getLong(int from, int to, boolean negative) {
         if (to <= from)
             throw new NumberFormatException();
+        int i = from;
+        while (i < to && text.charAt(i) == '0') {
+            if (++i == to)
+                return 0;
+        }
         long result = 0;
         if (negative) {
-            for (int i = from; i < to; i++) {
-                int n = convertDecDigit(text[i]);
-                if (result < MIN_LONG_DIV_10 || result == MIN_LONG_DIV_10 && n > MIN_LONG_MOD_10)
+            while (i < to) {
+                result = result * 10 - convertDecDigit(text.charAt(i++));
+                if (result >= 0)
                     throw new NumberFormatException();
-                result = result * 10 - n;
             }
         }
         else {
-            for (int i = from; i < to; i++) {
-                int n = convertDecDigit(text[i]);
-                if (result > MAX_LONG_DIV_10 || result == MAX_LONG_DIV_10 && n > MAX_LONG_MOD_10)
+            while (i < to) {
+                result = result * 10 + convertDecDigit(text.charAt(i++));
+                if (result < 0)
                     throw new NumberFormatException();
-                result = result * 10 + n;
             }
         }
         return result;
@@ -676,11 +698,11 @@ public class TextMatcher {
     public int getHexInt(int from, int to) {
         if (to <= from)
             throw new NumberFormatException();
-        int result = 0;
-        for (int i = from; i < to; i++) {
+        int result = convertHexDigit(text.charAt(from));
+        for (int i = from + 1; i < to; i++) {
             if ((result & MAX_INT_MASK) != 0)
                 throw new NumberFormatException();
-            result = result << 4 | convertHexDigit(text[i]);
+            result = result << 4 | convertHexDigit(text.charAt(i));
         }
         return result;
     }
@@ -707,11 +729,11 @@ public class TextMatcher {
     public long getHexLong(int from, int to) {
         if (to <= from)
             throw new NumberFormatException();
-        long result = 0;
-        for (int i = from; i < to; i++) {
+        long result = convertHexDigit(text.charAt(from));
+        for (int i = from + 1; i < to; i++) {
             if ((result & MAX_LONG_MASK) != 0)
                 throw new NumberFormatException();
-            result = result << 4 | convertHexDigit(text[i]);
+            result = result << 4 | convertHexDigit(text.charAt(i));
         }
         return result;
     }
@@ -771,7 +793,7 @@ public class TextMatcher {
      */
     public static class CharSeq implements CharSequence {
 
-        private final char[] text;
+        private final String text;
         private final int start;
         private final int end;
 
@@ -783,7 +805,7 @@ public class TextMatcher {
          * @param   start   the start offset
          * @param   end     the end offset
          */
-        CharSeq(char[] text, int start, int end) {
+        CharSeq(String text, int start, int end) {
             this.text = text;
             this.start = start;
             this.end = end;
@@ -810,7 +832,7 @@ public class TextMatcher {
             if (index >= 0) {
                 int i = index + start;
                 if (i < end)
-                    return text[i];
+                    return text.charAt(i);
             }
             throw new IndexOutOfBoundsException();
         }
@@ -836,7 +858,7 @@ public class TextMatcher {
          */
         @Override
         public String toString() {
-            return new String(text, start, end - start);
+            return text.substring(start, end);
         }
 
     }

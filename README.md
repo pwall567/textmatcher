@@ -18,8 +18,8 @@ The `TextMatcher` object is initialised with a `String`; this is the text to be 
 The text may be a single line, or it may be an entire file.
 
 The `TextMatcher` has two index values, which are updated with the results of match operations.
-- the `index` points to the current location within the text, and it will be updated as a result of match or skip
-  operations
+- the `index` points to the current location within the text, and it will be updated as a result of successful match or
+  skip operations
 - the `start` index points to the start of the most recently matched or skipped characters
 
 An example may help clarify this:
@@ -31,7 +31,7 @@ An example may help clarify this:
 
 ### Match Operations
 
-There are a number of match operations, all of which have names beginning with `match`, and all returning a boolean to
+There are a number of match functions, all of which have names beginning with `match`, and all returning a boolean to
 indicate success or failure.
 They all set the `index` to the position following the last matched character on success, and the `start` to the start
 of the matched characters.
@@ -67,9 +67,10 @@ There is also `getResultLength`, which returns the length of the matched string.
 In addition, there are a number of general operations to get data from any point in the text, and to get and set the
 `index` and `start` values.
 When setting these values, the new value must not be negative, and must not exceed the length of the string.
-When setting either value, if the result would be that the `index` was lower than the `start`, the other value (the one
-not being explicitly set) will be set to the same value.
-In other words, the `start` may never be greater than the `index`.
+
+When setting the `index`, if the new value is less than the `start`, the `start` is set to the same value.
+Similarly, when setting the `start`, if the new value is greater than the `index`, the `index` is set to the same value.
+In other words, the `start` will never be greater than the `index`.
 
 ## User Guide
 
@@ -96,24 +97,24 @@ The `match` function has three overloaded forms, both performing a match on one 
 
 - `boolean match(char ch)`: match a single character
 - `boolean match(CharSequence s)`: match a `CharSequence` (for example, a `String`)
-- `boolean match(CharPredicate test)`: match a single character using a `CharPredicate` test
+- `boolean match(CharPredicate test)`: match a single character using a [`CharPredicate`](#charpredicate) test
 
 ### `matchAny`
 
-This function matches a single character at `index` against a set of characters in a `String`:
+This function matches a single character at `index` as being any of the characters in a `String`:
 
 - `boolean matchAny(String characters)`
 
 For example, to test whether the character at the `index` is a plus or minus sign:
 ```java
     if (tm.matchAny("+-")) {
-        // the character is a sign; getResultChar() return the sign character
+        // the character is a sign; getResultChar() returns the sign character
     }
 ```
 
 ### `matchSeq`
 
-The `matchSeq` function matches a sequence of characters using a `CharPredicate`.
+The `matchSeq` function matches a sequence of characters using a [`CharPredicate`](#charpredicate).
 This allows testing the characters against arbitrary criteria, as shown in the example below.
 
 - `boolean matchSeq(int max, int min, CharPredicate test)`: match the characters at `index` using a `CharPredicate`
@@ -139,15 +140,16 @@ There is often a need to string match operations together.
 For example, when matching a computer language identifier, the first character is generally required to be alphabetic,
 while the remaining characters may be alphabetic or numeric.
 The `matchContinue` function, when invoked following a successful match, will match additional characters using a
-`CharPredicate`, but on completion, will leave the start index to the location set by the previous match.
+[`CharPredicate`](#charpredicate), but on completion, will leave the start index to the location set by the previous
+match.
 Also, the maximum number of characters limit will include those already found in the previous match.
 
-- `boolean matchContinue(int max, int min, CharPredicate test)`: match the characters at `index` using a `CharPredicate`
-  test, with a specified minimum and maximum (where zero maximum means no limit)
-- `boolean matchContinue(int max, CharPredicate test)`: match the characters at `index` using a `CharPredicate` test,
-  with no minimum and a specified maximum (again, zero means no limit)
-- `boolean matchContinue(CharPredicate test)`: match the characters at `index` using a `CharPredicate` test, with no
-  minimum or maximum
+- `boolean matchContinue(int max, int min, CharPredicate test)`: match the characters at `index` using a
+  [`CharPredicate`](#charpredicate) test, with a specified minimum and maximum (where zero maximum means no limit)
+- `boolean matchContinue(int max, CharPredicate test)`: match the characters at `index` using a
+  [`CharPredicate`](#charpredicate) test, with no minimum and a specified maximum (again, zero means no limit)
+- `boolean matchContinue(CharPredicate test)`: match the characters at `index` using a [`CharPredicate`](#charpredicate)
+  test, with no minimum or maximum
 
 For example, to match a Java identifier using the `isJavaIdentifierStart` and `isJavaIdentifierPart` functions of the
 `Character` class:
@@ -189,7 +191,7 @@ To match exactly four hexadecimal digits, use `matchHex(4, 4)`, supplying the sa
 
 ### `skip`
 
-This function skips characters that match a `CharPredicate`:
+This function skips characters that match a [`CharPredicate`](#charpredicate):
 
 - `void skip(CharPredicate test)`
 
@@ -244,8 +246,7 @@ getting the result as a `String`, for those cases where a `CharSequence` is equa
 
 ### `getResultLength`
 
-This gets the first character of the most recent match or skip as a `CharSequence` (this is slightly more efficient than
-getting the result as a `String`, for those cases where a `CharSequence` is equally useful):
+This gets the length of the most recent match or skip:
 
 - `int getResultLength()`
 
@@ -259,8 +260,9 @@ There are two forms of `getResultInt`, and the reason requires a little explanat
 The absolute value of the largest negative integer is one greater than the largest positive integer, so if a parsing
 operation detected a sign, and then attempted to parse a set of digits following the sign, it would not be able to
 handle a string representing `Integer.MIN_VALUE`.
-To get around this problem, a version of `getResultInt` allows a sign to be passed as a parameter, and if the value is
-negative, values up to (or down to) the maximum range for an `int` will be permitted.
+To get around this problem, a version of `getResultInt` allows a sign to be passed as a `boolean` parameter, and if the
+parameter is `true` (to indicate negative), the value is calculated by subtracting from zero, allowing values down to
+`Integer.MIN_VALUE` to be returned.
 
 - `int getResultInt()`
 - `int getResultInt(boolean negative)`
@@ -315,25 +317,25 @@ It includes the default functions `negate`, `and` and `or` for consistency with 
 
 ## Dependency Specification
 
-The latest version of the library is 2.3, and it may be obtained from the Maven Central repository.
+The latest version of the library is 2.4, and it may be obtained from the Maven Central repository.
 
 ### Maven
 ```xml
     <dependency>
       <groupId>net.pwall.text</groupId>
       <artifactId>textmatcher</artifactId>
-      <version>2.3</version>
+      <version>2.4</version>
     </dependency>
 ```
 ### Gradle
 ```groovy
-    testImplementation 'net.pwall.text:textmatcher:2.3'
+    testImplementation 'net.pwall.text:textmatcher:2.4'
 ```
 ### Gradle (kts)
 ```kotlin
-    testImplementation("net.pwall.text:textmatcher:2.3")
+    testImplementation("net.pwall.text:textmatcher:2.4")
 ```
 
 Peter Wall
 
-2022-11-23
+2023-12-01
