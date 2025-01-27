@@ -2,6 +2,18 @@
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## [Unreleased]
+### Added
+- `build.yml`, `deploy.yml`: converted project to GitHub Actions
+### Changed
+- `pom.xml`: moved to `io.jstuff` (package amd Maven group)
+- `TextMatcher`: introduced table to speed up hex digit tests and conversions
+- `TextMatcher`: added `skip(char)`, `skipTo(char)` and `skipto(CharSequence)` functions
+- `TextMatcher`: added `getText()` function
+- `TextMatcher`: added `appendResultTo(Appendable)` function
+### Removed
+- `.travis.yml`
+
 ## [2.4] - 2023-12-01
 ### Changed
 - `TextMatcher`: change to use string instead of char array

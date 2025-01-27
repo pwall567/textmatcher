@@ -23,13 +23,13 @@
  * SOFTWARE.
  */
 
-package net.pwall.text.test;
+package io.jstuff.text.test;
 
 import org.junit.Test;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import net.pwall.text.CharPredicate;
+import io.jstuff.text.CharPredicate;
 
 public class CharPredicateTest {
 

@@ -3,9 +3,9 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>net.pwall.text</groupId>
+  <groupId>io.jstuff</groupId>
   <artifactId>textmatcher</artifactId>
-  <version>2.4</version>
+  <version>3.0</version>
   <name>Text Matcher</name>
   <description>Text matching functions</description>
   <packaging>jar</packaging>
@@ -45,9 +45,9 @@
 
   <pluginRepositories>
     <pluginRepository>
-      <id>jcenter</id>
-      <name>JCenter</name>
-      <url>https://jcenter.bintray.com/</url>
+      <id>central</id>
+      <name>Maven Central</name>
+      <url>https://repo1.maven.org/maven2/</url>
     </pluginRepository>
   </pluginRepositories>
 
@@ -65,16 +65,16 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.8.1</version>
+        <version>3.13.0</version>
         <configuration>
-          <source>8</source>
-          <target>8</target>
+          <source>${java.version}</source>
+          <target>${java.version}</target>
         </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.2.0</version>
+        <version>3.7.0</version>
         <executions>
           <execution>
             <id>attach-javadocs</id>
@@ -90,7 +90,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
-        <version>3.2.1</version>
+        <version>3.3.1</version>
         <executions>
           <execution>
             <id>attach-sources</id>
@@ -101,20 +101,9 @@
         </executions>
       </plugin>
       <plugin>
-        <groupId>org.sonatype.plugins</groupId>
-        <artifactId>nexus-staging-maven-plugin</artifactId>
-        <version>1.6.13</version>
-        <extensions>true</extensions>
-        <configuration>
-          <serverId>ossrh</serverId>
-          <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-          <autoReleaseAfterClose>true</autoReleaseAfterClose>
-        </configuration>
-      </plugin>
-      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-gpg-plugin</artifactId>
-        <version>1.6</version>
+        <version>3.2.4</version>
         <executions>
           <execution>
             <id>sign-artifacts</id>
@@ -124,6 +113,16 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.sonatype.central</groupId>
+        <artifactId>central-publishing-maven-plugin</artifactId>
+        <version>0.6.0</version>
+        <extensions>true</extensions>
+        <configuration>
+          <publishingServerId>central</publishingServerId>
+          <autoPublish>true</autoPublish>
+        </configuration>
       </plugin>
     </plugins>
   </build>

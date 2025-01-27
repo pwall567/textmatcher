@@ -2,7 +2,7 @@
  * @(#) TextMatcherTest.java
  *
  * TextMatcher  Text matching functions
- * Copyright (c) 2021, 2023 Peter Wall
+ * Copyright (c) 2021, 2023, 2025 Peter Wall
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +23,9 @@
  * SOFTWARE.
  */
 
-package net.pwall.text.test;
+package io.jstuff.text.test;
+
+import java.io.IOException;
 
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
@@ -31,19 +33,21 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
-import net.pwall.text.TextMatcher;
+import io.jstuff.text.TextMatcher;
 
 public class TextMatcherTest {
 
     @Test
-    public void shouldCreateParserAndReturnStartAndIndex() {
+    public void shouldCreateParserAndReturnTextAndStartAndIndex() {
         TextMatcher textMatcher = new TextMatcher("{}");
+        assertEquals("{}", textMatcher.getText());
         assertEquals(2, textMatcher.getLength());
         assertEquals(0, textMatcher.getStart());
         assertEquals(0, textMatcher.getIndex());
         assertEquals("", textMatcher.getResult());
     }
 
+    @SuppressWarnings("DataFlowIssue")
     @Test
     public void shouldComplainWhenTextIsNull() {
         assertThrows(NullPointerException.class, () -> new TextMatcher(null));
@@ -134,7 +138,7 @@ public class TextMatcherTest {
     }
 
     @Test
-    public void shouldSkipCharacters() {
+    public void shouldSkipCharactersInSet() {
         TextMatcher textMatcher1 = new TextMatcher("   {}");
         textMatcher1.skipAny(" \t\n\r");
         assertEquals(0, textMatcher1.getStart());
@@ -150,6 +154,57 @@ public class TextMatcherTest {
         assertEquals("54321", textMatcher2.getResult());
         assertTrue(textMatcher2.match('A'));
         assertTrue(textMatcher2.isAtEnd());
+    }
+
+    @Test
+    public void shouldSkipCharactersByValue() {
+        TextMatcher textMatcher = new TextMatcher("   {}");
+        textMatcher.skip(' ');
+        assertEquals(0, textMatcher.getStart());
+        assertEquals(3, textMatcher.getIndex());
+        assertEquals("   ", textMatcher.getResult());
+        textMatcher.skip(' ');
+        assertEquals(3, textMatcher.getStart());
+        assertEquals(3, textMatcher.getIndex());
+        assertTrue(textMatcher.match('{'));
+        assertFalse(textMatcher.isAtEnd());
+    }
+
+    @Test
+    public void shouldSkipToCharacter() {
+        TextMatcher textMatcher = new TextMatcher("//   \n");
+        assertTrue(textMatcher.match("//"));
+        textMatcher.skipTo('\n');
+        assertEquals(2, textMatcher.getStart());
+        assertEquals(5, textMatcher.getIndex());
+        assertEquals("   ", textMatcher.getResult());
+        assertFalse(textMatcher.isAtEnd());
+    }
+
+    @Test
+    public void shouldSkipToString() {
+        TextMatcher textMatcher = new TextMatcher("/*****/");
+        assertTrue(textMatcher.match("/*"));
+        textMatcher.skipTo("*/");
+        assertEquals(2, textMatcher.getStart());
+        assertEquals(5, textMatcher.getIndex());
+        assertEquals("***", textMatcher.getResult());
+        assertFalse(textMatcher.isAtEnd());
+
+        textMatcher.setIndex(2);
+        textMatcher.skipTo("**%");
+        assertEquals(2, textMatcher.getStart());
+        assertTrue(textMatcher.isAtEnd());
+
+        textMatcher.setIndex(2);
+        textMatcher.skipTo("");
+        assertEquals(2, textMatcher.getStart());
+        assertEquals(2, textMatcher.getIndex());
+
+        textMatcher.setIndex(2);
+        textMatcher.skipTo("/");
+        assertEquals(2, textMatcher.getStart());
+        assertEquals(6, textMatcher.getIndex());
     }
 
     @Test
@@ -276,6 +331,17 @@ public class TextMatcherTest {
         assertEquals(5, textMatcher.getIndex());
         assertEquals("12345", textMatcher.getResult());
         assertEquals("12345", textMatcher.getResultCharSeq().toString());
+    }
+
+    @Test
+    public void shouldAppendResultToAppendable() throws IOException {
+        TextMatcher textMatcher = new TextMatcher("12345ABC");
+        assertTrue(textMatcher.matchDec());
+        assertEquals(0, textMatcher.getStart());
+        assertEquals(5, textMatcher.getIndex());
+        StringBuilder sb = new StringBuilder();
+        textMatcher.appendResultTo(sb);
+        assertEquals("12345", sb.toString());
     }
 
     @Test

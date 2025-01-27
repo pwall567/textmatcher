@@ -23,7 +23,7 @@
  * SOFTWARE.
  */
 
-package net.pwall.text;
+package io.jstuff.text;
 
 import java.util.Objects;
 

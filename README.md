@@ -1,8 +1,8 @@
 # textmatcher
 
-[![Build Status](https://travis-ci.com/pwall567/textmatcher.svg?branch=main)](https://travis-ci.com/github/pwall567/textmatcher)
+[![Build Status](https://github.com/pwall567/textmatcher/actions/workflows/build.yml/badge.svg)](https://github.com/pwall567/textmatcher/actions/workflows/build.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Maven Central](https://img.shields.io/maven-central/v/net.pwall.text/textmatcher?label=Maven%20Central)](https://search.maven.org/search?q=g:%22net.pwall.text%22%20AND%20a:%22textmatcher%22)
+[![Maven Central](https://img.shields.io/maven-central/v/io.jstuff/textmatcher?label=Maven%20Central)](https://search.maven.org/search?q=g:%22io.jstuff%22%20AND%20a:%22textmatcher%22)
 
 Text matching functions
 
@@ -191,20 +191,46 @@ To match exactly four hexadecimal digits, use `matchHex(4, 4)`, supplying the sa
 
 ### `skip`
 
-This function skips characters that match a [`CharPredicate`](#charpredicate):
+The `skip()` function has two overloaded forms.
 
+- `void skip(char ch)`
 - `void skip(CharPredicate test)`
 
-For example:
+The first takes a single character, and causes the `TextMatcher` to skip any instances of that character:
+```java
+    tm.skip(' ');
+```
+
+The second form skips characters that match a [`CharPredicate`](#charpredicate):
 ```java
     tm.skip(Character::isWhitespace);
 ```
+
+### `skipTo`
+
+The `skipTo()` function also has two overloaded forms.
+
+- `void skipTo(char ch)`
+- `void skipTo(CharSequence seq)`
+
+The first form skips to the next instance of a nominated character:
+```java
+    tm.skipTo('\n');
+```
+
+The second form skips to the next instance of a string (specified as a `CharSequence`):
+```java
+    tm.skipTo("*/");
+```
+
+Both forms will stop at end of text; if it is important to know whether the target was actually seen, the caller can use
+a `match()` operation to check the next character(s), or test `isAtEnd()`.
 
 ### `skipFixed`
 
 This skips a fixed number of characters, and throws an exception if the new index would be out of range:
 
-- `void skip(int n)`
+- `void skipFixed(int n)`
 
 ### `skipAny`
 
@@ -230,6 +256,13 @@ This may be used, for example, on encountering a "`#`" indicating the start of a
 This gets the result of the most recent match or skip operation as a string:
 
 - `String getResult()`
+
+### `appendResultTo`
+
+This will copy the result of the most recent match or skip operation to an `Appendable` (for example, a
+`StringBuilder`), avoiding the need to create an intermediate `String`.
+
+- `void appendResultTo(Appendable a)`
 
 ### `getResultChar`
 
@@ -317,25 +350,25 @@ It includes the default functions `negate`, `and` and `or` for consistency with 
 
 ## Dependency Specification
 
-The latest version of the library is 2.4, and it may be obtained from the Maven Central repository.
+The latest version of the library is 3.0, and it may be obtained from the Maven Central repository.
 
 ### Maven
 ```xml
     <dependency>
-      <groupId>net.pwall.text</groupId>
+      <groupId>io.jstuff</groupId>
       <artifactId>textmatcher</artifactId>
-      <version>2.4</version>
+      <version>3.0</version>
     </dependency>
 ```
 ### Gradle
 ```groovy
-    testImplementation 'net.pwall.text:textmatcher:2.4'
+    testImplementation 'io.jstuff:textmatcher:3.0'
 ```
 ### Gradle (kts)
 ```kotlin
-    testImplementation("net.pwall.text:textmatcher:2.4")
+    testImplementation("io.jstuff:textmatcher:3.0")
 ```
 
 Peter Wall
 
-2023-12-01
+2025-01-27

@@ -2,7 +2,7 @@
  * @(#) TextMatcher.java
  *
  * TextMatcher  Text matching functions
- * Copyright (c) 2021, 2022 Peter Wall
+ * Copyright (c) 2021, 2022, 2024, 2025 Peter Wall
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +23,9 @@
  * SOFTWARE.
  */
 
-package net.pwall.text;
+package io.jstuff.text;
+
+import java.io.IOException;
 
 /**
  * A text matching class to help with parsing text strings.  It maintains a current pointer within a string and updates
@@ -49,6 +51,17 @@ public class TextMatcher {
     private static final int MAX_INT_MASK = 0xF << 28;
     private static final long MAX_LONG_MASK = ((long)0xF) << 60;
 
+    private static final byte[] hexValues = new byte[] {
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+             0,  1,  2,  3,  4,  5,  6,  7,  8,  9, -1, -1, -1, -1, -1, -1,
+            -1, 10, 11, 12, 13, 14, 15, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, 10, 11, 12, 13, 14, 15, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+    };
+
     private final String text;
     private final int length;
     private int start;
@@ -67,6 +80,15 @@ public class TextMatcher {
         length = text.length();
         start = 0;
         index = 0;
+    }
+
+    /**
+     * Get the entire text.
+     *
+     * @return      the text
+     */
+    public String getText() {
+        return text;
     }
 
     /**
@@ -395,6 +417,17 @@ public class TextMatcher {
     }
 
     /**
+     * Increment the index past any instances of the given character.
+     *
+     * @param   ch      the character to be skipped
+     */
+    public void skip(Character ch) {
+        start = index;
+        while (index < length && text.charAt(index) == ch)
+            index++;
+    }
+
+    /**
      * Increment the index past any characters matching a given comparison function.
      *
      * @param   comparison  the comparison function
@@ -403,6 +436,50 @@ public class TextMatcher {
         start = index;
         while (index < length && comparison.test(text.charAt(index)))
             index++;
+    }
+
+    /**
+     * Increment the index to the next instance of the given character, or to end of the text if character not found.
+     * If it is important to know whether the character has been found, a {@link #match(char)} function may be used.
+     *
+     * @param   ch      the character to be skipped to
+     */
+    public void skipTo(Character ch) {
+        start = index;
+        while (index < length && text.charAt(index) != ch)
+            index++;
+    }
+
+    /**
+     * Increment the index to the next instance of the given {@link CharSequence} ({@link String}, {@link StringBuilder}
+     * etc.), or to end of the text if target not found.  If it is important to know whether the target has been found,
+     * a {@link #match(CharSequence)} function may be used.
+     *
+     * @param   target  the string to be skipped to
+     */
+    public void skipTo(CharSequence target) {
+        start = index;
+        int targetLength = target.length();
+        if (targetLength == 0)
+            return;
+        if (targetLength == 1)
+            skipTo(target.charAt(0));
+        else {
+            char firstChar = target.charAt(0);
+            int stopper = length - targetLength;
+            while (index <= stopper) {
+                if (text.charAt(index) == firstChar) {
+                    int i = index + 1;
+                    int j = 1; // we know there will be at least one additional character
+                    while (text.charAt(i++) == target.charAt(j++)) {
+                        if (j == targetLength)
+                            return;
+                    }
+                }
+                index++;
+            }
+            index = length;
+        }
     }
 
     /**
@@ -489,6 +566,17 @@ public class TextMatcher {
      */
     public String getResult() {
         return text.substring(start, index);
+    }
+
+    /**
+     * Append the result of the last match to an {@link Appendable}.  This is more efficient than {@link #getResult()}
+     * since it doesn't require the creation of an intermediate {@link String}.
+     *
+     * @param   a       the {@link Appendable}
+     * @throws IOException if thrown by the {@link Appendable}
+     */
+    public void appendResultTo(Appendable a) throws IOException {
+        a.append(text, start, index);
     }
 
     /**
@@ -755,7 +843,7 @@ public class TextMatcher {
      * @return          {@code true} if the character is a hexadecimal digit
      */
     public static boolean isHexDigit(char ch) {
-        return isDigit(ch) || ch >= 'A' && ch <= 'F' || ch >= 'a' && ch <= 'f';
+        return ch < 0x80 && hexValues[ch] >= 0;
     }
 
     /**
@@ -779,12 +867,11 @@ public class TextMatcher {
      * @throws          NumberFormatException if the digit is not valid
      */
     public static int convertHexDigit(char ch) {
-        if (ch >= '0' && ch <= '9')
-            return ch - '0';
-        if (ch >= 'A' && ch <= 'F')
-            return ch - 'A' + 10;
-        if (ch >= 'a' && ch <= 'f')
-            return ch - 'a' + 10;
+        if (ch < 0x80) {
+            int hex = hexValues[ch];
+            if (hex >= 0)
+                return hex;
+        }
         throw new NumberFormatException("Illegal hexadecimal digit");
     }
 
