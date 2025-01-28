@@ -2,7 +2,7 @@
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
-## [Unreleased]
+## [3.0] - 2025-01-28
 ### Added
 - `build.yml`, `deploy.yml`: converted project to GitHub Actions
 ### Changed
