@@ -26,6 +26,7 @@
 package io.jstuff.text.test;
 
 import java.io.IOException;
+import java.io.StringWriter;
 
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
@@ -339,9 +340,36 @@ public class TextMatcherTest {
         assertTrue(textMatcher.matchDec());
         assertEquals(0, textMatcher.getStart());
         assertEquals(5, textMatcher.getIndex());
+        StringWriter sw = new StringWriter();
+        textMatcher.appendResultTo(sw);
+        assertEquals("12345", sw.toString());
+    }
+
+    @Test
+    public void shouldAppendResultToStringBuilder() {
+        TextMatcher textMatcher = new TextMatcher("12345ABC");
+        assertTrue(textMatcher.matchDec());
+        assertEquals(0, textMatcher.getStart());
+        assertEquals(5, textMatcher.getIndex());
         StringBuilder sb = new StringBuilder();
         textMatcher.appendResultTo(sb);
         assertEquals("12345", sb.toString());
+    }
+
+    @Test
+    public void shouldAppendSubstringToAppendable() throws IOException {
+        TextMatcher textMatcher = new TextMatcher("12345ABC");
+        StringWriter sw = new StringWriter();
+        textMatcher.appendSubstringTo(sw, 2, 6);
+        assertEquals("345A", sw.toString());
+    }
+
+    @Test
+    public void shouldAppendSubstringToStringBuilder() {
+        TextMatcher textMatcher = new TextMatcher("12345ABC");
+        StringBuilder sb = new StringBuilder();
+        textMatcher.appendSubstringTo(sb, 3, 6);
+        assertEquals("45A", sb.toString());
     }
 
     @Test

@@ -2,6 +2,12 @@
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## [3.1] - 2025-05-27
+### Changed
+- `TextMatcher`: added `appendSubstringTo(Appendable)` function
+- `TextMatcher`: added `appendResultTo(StringBuilder)` and `appendSubstringTo(StringBuilder)` functions
+- `pom.xml`: switched to use `jstuff-maven` parent POM
+
 ## [3.0] - 2025-01-28
 ### Added
 - `build.yml`, `deploy.yml`: converted project to GitHub Actions

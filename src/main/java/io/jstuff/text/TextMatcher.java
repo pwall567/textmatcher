@@ -565,7 +565,7 @@ public class TextMatcher {
      * @return          the result of the last match
      */
     public String getResult() {
-        return text.substring(start, index);
+        return start == index ? "" : text.substring(start, index);
     }
 
     /**
@@ -573,10 +573,49 @@ public class TextMatcher {
      * since it doesn't require the creation of an intermediate {@link String}.
      *
      * @param   a       the {@link Appendable}
-     * @throws IOException if thrown by the {@link Appendable}
+     * @throws  IOException if thrown by the {@link Appendable}
      */
     public void appendResultTo(Appendable a) throws IOException {
-        a.append(text, start, index);
+        if (start != index)
+            a.append(text, start, index);
+    }
+
+    /**
+     * Append the result of the last match to a {@link StringBuilder}.  This is more efficient than {@link #getResult()}
+     * since it doesn't require the creation of an intermediate {@link String}.
+     *
+     * @param   sb      the {@link StringBuilder}
+     */
+    public void appendResultTo(StringBuilder sb) {
+        if (start != index)
+            sb.append(text, start, index);
+    }
+
+    /**
+     * Append a substring of the text to an {@link Appendable}.  This is more efficient than
+     * {@link #getString(int, int)} since it doesn't require the creation of an intermediate {@link String}.
+     *
+     * @param   a       the {@link Appendable}
+     * @param   from    the start offset
+     * @param   to      the end offset
+     * @throws  IOException if thrown by the {@link Appendable}
+     */
+    public void appendSubstringTo(Appendable a, int from, int to) throws IOException {
+        if (from != to)
+            a.append(text, from, to);
+    }
+
+    /**
+     * Append a substring of the text to a {@link StringBuilder}.  This is more efficient than
+     * {@link #getString(int, int)} since it doesn't require the creation of an intermediate {@link String}.
+     *
+     * @param   sb      the {@link Appendable}
+     * @param   from    the start offset
+     * @param   to      the end offset
+     */
+    public void appendSubstringTo(StringBuilder sb, int from, int to) {
+        if (from != to)
+            sb.append(text, from, to);
     }
 
     /**

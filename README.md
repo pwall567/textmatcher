@@ -92,7 +92,7 @@ As described above, the `start` may never be set to a value greater than the `in
 
 ### `match`
 
-The `match` function has three overloaded forms, both performing a match on one or more characters at the current
+The `match` function has three overloaded forms, each performing a match on one or more characters at the current
 `index`:
 
 - `boolean match(char ch)`: match a single character
@@ -259,10 +259,22 @@ This gets the result of the most recent match or skip operation as a string:
 
 ### `appendResultTo`
 
-This will copy the result of the most recent match or skip operation to an `Appendable` (for example, a
-`StringBuilder`), avoiding the need to create an intermediate `String`.
+This will append the result of the most recent match or skip operation to an `Appendable`, avoiding the need to create
+an intermediate `String`.
+A separate version is provided for the common case of appending to a `SringBuilder`, since operations on an `Appendable`
+may throw `IOException` but those on `StringBuilder` do not.
 
-- `void appendResultTo(Appendable a)`
+- `void appendResultTo(Appendable a) throws IOException`
+- `void appendResultTo(StringBuilder sb)`
+
+### `appendSubstringTo`
+
+This will append a substring of the text defined by the `from` offset (inclusive) and the `to` offset (exclusive) to an
+`Appendable`, avoiding the need to create an intermediate `String`.
+As above, a separate version is provided for appending to a `StringBuilder`.
+
+- `void appendSubstringTo(Appendable a, int from, int to) throws IOException`
+- `void appendSubstringTo(StringBuilder sb, int from, int to)`
 
 ### `getResultChar`
 
@@ -350,25 +362,25 @@ It includes the default functions `negate`, `and` and `or` for consistency with 
 
 ## Dependency Specification
 
-The latest version of the library is 3.0, and it may be obtained from the Maven Central repository.
+The latest version of the library is 3.1, and it may be obtained from the Maven Central repository.
 
 ### Maven
 ```xml
     <dependency>
       <groupId>io.jstuff</groupId>
       <artifactId>textmatcher</artifactId>
-      <version>3.0</version>
+      <version>3.1</version>
     </dependency>
 ```
 ### Gradle
 ```groovy
-    testImplementation 'io.jstuff:textmatcher:3.0'
+    testImplementation 'io.jstuff:textmatcher:3.1'
 ```
 ### Gradle (kts)
 ```kotlin
-    testImplementation("io.jstuff:textmatcher:3.0")
+    testImplementation("io.jstuff:textmatcher:3.1")
 ```
 
 Peter Wall
 
-2025-01-27
+2025-05-27
